@@ -95,6 +95,8 @@ function wait(ms) {
 			completion.innerHTML = "Complete after " + milliseconds + "ms.";
 		};
 ----
+
+The setTimeOut function produce promise object after milliseconds. After that, the thenable finish is executed.
 +
-- The setTimeOut function produce promise object after milliseconds. After that, the thenable finish is executed.
+==== Lesson 1.8 Quiz: Wrapping readystate
 
