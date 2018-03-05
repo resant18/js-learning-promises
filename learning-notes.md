@@ -204,7 +204,7 @@ get('../data/earth-like-results.json')
 > Fetch return promise. The Promise returned from fetch() won’t reject on HTTP error status even if the response is an HTTP 404 or 500. Instead, it will resolve normally (with ok status set to false), and it will only reject on network failure or if anything prevented the request from completing.
 
 ```javascript
-  * XHR wrapped in a Promise.
+   * XHR wrapped in a Promise.
    * @param  {String} url - The URL to fetch.
    * @return {Promise}    - A Promise that resolves when the XHR succeeds and fails otherwise.
    */
