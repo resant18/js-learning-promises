@@ -1,6 +1,13 @@
 # Javascript Promise Learning Notes 
 
-## [Udacity Javascript Promises Course](https://www.udacity.com/course/javascript-promises--ud898)
+Table of Contents
+  * [How to Upload Exoplanet Explorer Project from Local Machine to Remote Repository](#how)
+  * [Lesson 1: Creating Promises](#lesson-1)
+  * [Lesson 1.8: Quiz: Write Your First Promise](#lesson-1.8)
+  * [Lesson 1.11 Quiz: Wrap an XHR](#lesson-1.11)
+  * [Lesson 1.13 Quiz: Fetch API](#lesson-1.13)
+
+## [Udacity Javascript Promises Course](https://www.udacity.com/course/javascript-promises--ud898)<a id="how"></a>
 
 ### How to Upload Exoplanet Explorer Project from Local Machine to Remote Repository
 1. Create a new repository on GitHub 
@@ -47,8 +54,10 @@ $ git push origin HEAD:master
 ```
 
 
-### Lesson 1: Creating Promises
-#### Lesson 1.8 Quiz: Write Your First Promise
+### Lesson 1: Creating Promises<a id="lesson-1"></a>
+
+#### Lesson 1.8 Quiz: Write Your First Promise<a id="lesson-1.8"></a>
+> Print 'Resolve' after a certain milliseconds.
 ```javascript
 function wait(ms) {
   /*
@@ -82,6 +91,155 @@ function finish() {
 };
 ```
 
-The setTimeOut function produce promise object after milliseconds. After that, the thenable finish is executed.
+* The setTimeOut function return promise object after milliseconds. After that, the thenable finish is executed.
 
-#### Lesson 1.8 Quiz: Wrapping readystate
+#### Lesson 1.8 Quiz: Wrapping readystate<a id="lesson-1.8"></a>
+> Create a function to show "Resolved" text on the web page before the huge image finish loading.
+
+```javascript
+function ready() {
+			/*
+			Your code goes here!
+
+			Instructions:
+			(1) Set network throttling.
+			(2) Wrap an event listener for readystatechange in a Promise.
+			(3) If document.readyState is not 'loading', resolve().
+			(4) Test by chaining wrapperResolved(). If all goes well, you should see "Resolved" on the page!
+
+			Make sure you return the Promise!
+			 */
+
+			  return new Promise(function(resolve) { 
+					document.addEventListener('readystatechange', function() {
+						/*
+						Your code here too!
+						 */
+						if (document.readyState !== 'loading') {
+							console.log('inside listener:' + document.readyState);
+							resolve();
+						}
+					});	
+					if (document.readyState !== 'loading') {
+							console.log(document.readyState);
+							resolve();	
+					};		
+				});
+
+		};
+
+		/*
+		Don't forget to test your code!
+		Call wrapperResolved when the DOM is ready.
+		 */
+		ready().then(wrapperResolved);
+		
+		// Just here for your testing
+		function wrapperResolved() {
+			var completion = document.querySelector('.completion');
+			completion.innerHTML = "Resolved!";
+		};
+```
+
+* There are two same conditions for checking the document state, which are before and after creating the promise. This is necessary to catch the document state before the event listener even get the chance to 'listen' the event. 
+
+* Since the two condition are the same, the code can be simplify by creating the **checkState() function** as the instructor's solution as below:
+```javascript
+return new Promise(function(resolve) {
+    function checkState() {
+      if (document.readyState !== 'loading') {
+        console.log(document.readyState);
+        resolve();
+      }
+    }
+    document.addEventListener('readystatechange', checkState);
+    checkState();
+  });
+```
+#### Lesson 1.11 Quiz: Wrap an XHR<a id="lesson-1.11"></a>
+> Wrap XMLHttpRequest in Promise. 
+
+```javascript
+/**
+ * XHR wrapped in a promise.
+ * @param  {String} url - The URL to fetch.
+ * @return {Promise}    - A Promise that resolves when the XHR succeeds and fails otherwise.
+ */
+function get(url) {
+  /*
+  This code needs to get wrapped in a Promise!
+   */
+  return new Promise(function(resolve, reject) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url);
+    req.onload = function() {
+      if (req.status === 200) {
+        resolve(req.response);
+      } else {
+        reject(Error(req.statusText));
+      };        
+    }
+    req.onerror = function() {
+      // It failed :(
+      // Pass a 'Network Error' to reject
+      reject(Error('Network Error'));
+    };
+    req.send();      
+  });
+}
+```
+* Notice that the **onerror()** and **send()** method are not wrapped in Promise in order to keep sending the request even before the response is ready.
+* Adding the .then and .catch when calling get function.
+```javascript
+get('../data/earth-like-results.json')
+.then(function(response) {
+  addSearchHeader(response);
+})
+.catch(function() {
+  addSearchHeader('unknown');
+  console.log('Unknown error');
+});
+```
+#### Lesson 1.13 Quiz: Fetch API<a id="lesson-1.13"></a>
+> Fetch return promise. The Promise returned from fetch() won’t reject on HTTP error status even if the response is an HTTP 404 or 500. Instead, it will resolve normally (with ok status set to false), and it will only reject on network failure or if anything prevented the request from completing.
+
+```javascript
+  * XHR wrapped in a Promise.
+   * @param  {String} url - The URL to fetch.
+   * @return {Promise}    - A Promise that resolves when the XHR succeeds and fails otherwise.
+   */
+  //MyNote: Then and catch callback can be ommitted if it just return the response/error. 
+  function get(url) {
+    return fetch(url)
+    .then(response => response)
+    .catch(err => err);
+  }
+
+  /**
+   * Performs an XHR for a JSON and returns a parsed JSON response.
+   * @param  {String} url - The JSON URL to fetch.
+   * @return {Promise}    - A promise that passes the parsed JSON response.
+   */
+  function getJSON(url) {
+    return get(url).then(function(response) {
+      // Handle network errors
+      if (!response.ok) {
+        throw Error(response.statusText ? response.statusText : 'Unknown network error')
+      }
+      return response.json();
+    });
+  }
+
+  window.addEventListener('WebComponentsReady', function() {
+    home = document.querySelector('section[data-route="home"]');
+    getJSON('../data/earth-like-results.json')
+    .then(function(response) {
+      addSearchHeader(response.query);
+      console.log(response);
+    })
+    .catch(function(error) {
+      addSearchHeader('unknown');
+      console.log(error);
+    });
+  });
+```
